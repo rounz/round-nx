@@ -1,20 +1,20 @@
-import React from 'react';
-import { render, cleanup } from '@testing-library/react';
+import React from 'react'
+import { render, cleanup } from '@testing-library/react'
 
-import App from './app';
+import App from './app'
 
 describe('App', () => {
-  afterEach(cleanup);
+  afterEach(cleanup)
 
   it('should render successfully', () => {
-    const { baseElement } = render(<App />);
+    const { baseElement } = render(<App />)
 
-    expect(baseElement).toBeTruthy();
-  });
+    expect(baseElement).toBeTruthy()
+  })
 
   it('should have a greeting as the title', () => {
-    const { getByText } = render(<App />);
+    const { getByText } = render(<App />)
 
-    expect(getByText('Welcome to love-letterz!')).toBeTruthy();
-  });
-});
+    expect(getByText('Welcome to love-letterz!')).toBeTruthy()
+  })
+})

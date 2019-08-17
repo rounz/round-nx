@@ -1,6 +1,6 @@
-import React from 'react';
+import React from 'react'
 
-import './app.scss';
+import './app.scss'
 
 export const App = () => {
   /*
@@ -80,7 +80,7 @@ nx affected:e2e
         </details>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App
