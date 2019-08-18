@@ -1,6 +1,6 @@
-import { ZIO } from './zio'
 import * as E from 'fp-ts/lib/Either'
 import { Either } from 'fp-ts/lib/Either'
+import { ZIO } from './zio'
 
 const expectLeft = <E, A>(result: Either<E, A>) =>
   expect(E.isLeft(result) && result.left)
@@ -49,8 +49,8 @@ describe('ZIO bindings', () => {
   })
 
   it('zip', async () => {
-    const z1 = ZIO.rightIO(() => 4)
-    const z2 = ZIO.rightIO(() => '2')
+    const z1 = ZIO.succeedLazy(() => 4)
+    const z2 = ZIO.succeedLazy(() => '2')
 
     const z3 = ZIO.zip(z1, z2)
     const result = await z3({})()
@@ -59,8 +59,8 @@ describe('ZIO bindings', () => {
   })
 
   it('zipPar', async () => {
-    const z1 = ZIO.rightIO(() => 4)
-    const z2 = ZIO.rightIO(() => '2')
+    const z1 = ZIO.succeedLazy(() => 4)
+    const z2 = ZIO.succeedLazy(() => '2')
 
     const z3 = ZIO.zipPar(z1, z2)
     const result = await z3({})()

@@ -1,12 +1,14 @@
+import * as RTE from 'fp-ts/lib/ReaderTaskEither'
+import * as TE from 'fp-ts/lib/TaskEither'
 import {
   ReaderTaskEither,
   readerTaskEither,
   readerTaskEitherSeq
 } from 'fp-ts/lib/ReaderTaskEither'
-import * as RTE from 'fp-ts/lib/ReaderTaskEither'
-import * as TE from 'fp-ts/lib/TaskEither'
-import { sequenceT } from 'fp-ts/lib/Apply'
+import { Either } from 'fp-ts/lib/Either'
 import { identity } from 'fp-ts/lib/function'
+import { sequenceT } from 'fp-ts/lib/Apply'
+import { tryCatch } from 'fp-ts/lib/TaskEither'
 
 export type ZIO<R, E, A> = ReaderTaskEither<R, E, A>
 
@@ -21,6 +23,10 @@ export type RIO<R, A> = ZIO<R, Throwable, A>
 export type IO<E, A> = ZIO<void, E, A>
 
 export type Throwable = unknown
+
+const zio = readerTaskEither
+
+const zioSeq = readerTaskEitherSeq
 
 const succeed: <R = void, E = never, A = never>(a: A) => ZIO<R, E, A> =
   RTE.right
@@ -42,9 +48,15 @@ function fromTry<R = void, A = never>(f: () => A): ZIO<R, Throwable, A> {
     )
 }
 
-const zip = sequenceT(readerTaskEitherSeq)
+function fromTask<R = void, A = never>(
+  f: () => Promise<A>
+): ZIO<R, Throwable, A> {
+  return RTE.fromTaskEither(tryCatch(f, identity))
+}
 
-const zipPar = sequenceT(readerTaskEither)
+const zip = sequenceT(zio)
+
+const zipPar = sequenceT(zioSeq)
 
 function catchAll<R, E, A>(
   onError: (e: Throwable) => ZIO<R, E, A>
@@ -86,13 +98,58 @@ const provide: <R, E, A>(
   r: R
 ) => (ma: ZIO<R, E, A>) => ZIO<void, E, A> = r => ma => () => ma(r)
 
+function foldM<R, E, A, B>(
+  onError: (e: E) => ZIO<R, never, B>,
+  onSuccess: (a: A) => ZIO<R, never, B>
+): (ma: ZIO<R, E, A>) => ZIO<R, never, B> {
+  return RTE.fold(onError, onSuccess)
+}
+
+function fold<R, E, A, B>(
+  onError: (e: E) => B,
+  onSuccess: (a: A) => B
+): (ma: ZIO<R, E, A>) => ZIO<R, E, B> {
+  return foldM(e => succeed(onError(e)), a => succeed(onSuccess(a)))
+}
+
+function getOrElseM<R, E, A>(
+  onError: (e: E) => ZIO<R, never, A>
+): (ma: ZIO<R, E, A>) => ZIO<R, never, A> {
+  return foldM(onError, succeed)
+}
+
+const getOrElse: <R, E, A>(
+  onError: (e: E) => A
+) => (ma: ZIO<R, E, A>) => ZIO<R, E, A> = onError =>
+  getOrElseM(e => succeed(onError(e)))
+
+function run<R>(r: R): <E, A>(ma: ZIO<R, E, A>) => Promise<Either<E, A>> {
+  return ma => ma(r)()
+}
+
 export const ZIO = {
-  ...RTE,
   succeed,
   fail,
+  succeedLazy: RTE.rightIO,
+  failLazy: RTE.leftIO,
+  succeedTask: RTE.rightTask,
+  failTask: RTE.leftTask,
+  fromTask,
+  fromEither: RTE.fromEither,
+  fromPredicate: RTE.fromPredicate,
+  fromTaskEither: RTE.fromTaskEither,
   fromTry,
   zip,
   zipPar,
+  map: RTE.map,
+  flatMap: RTE.chain,
+  mapLeft: RTE.mapLeft,
+  orElse: RTE.orElse,
+  foldM,
+  fold,
+  getOrElseM,
+  getOrElse,
+  run,
   catchAll,
   catchSome,
   access,

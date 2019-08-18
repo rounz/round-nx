@@ -1,7 +1,6 @@
-import React from 'react'
-import { render, cleanup } from '@testing-library/react'
-
+import { cleanup, render } from '@testing-library/react'
 import App from './app'
+import React from 'react'
 
 describe('App', () => {
   afterEach(cleanup)
