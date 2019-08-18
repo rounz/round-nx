@@ -4,7 +4,9 @@ import {
   readerTaskEitherSeq
 } from 'fp-ts/lib/ReaderTaskEither'
 import * as RTE from 'fp-ts/lib/ReaderTaskEither'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { sequenceT } from 'fp-ts/lib/Apply'
+import { identity } from 'fp-ts/lib/function'
 
 export type ZIO<R, E, A> = ReaderTaskEither<R, E, A>
 
@@ -25,17 +27,24 @@ const succeed: <R = void, E = never, A = never>(a: A) => ZIO<R, E, A> =
 
 const fail: <R = void, E = never, A = never>(e: E) => ZIO<R, E, A> = RTE.left
 
+function fromTry<R = void, A = never>(f: () => A): ZIO<R, Throwable, A> {
+  return () =>
+    TE.tryCatch(
+      () =>
+        new Promise((resolve, reject) => {
+          try {
+            resolve(f())
+          } catch (e) {
+            reject(e)
+          }
+        }),
+      identity
+    )
+}
+
 const zip = sequenceT(readerTaskEitherSeq)
 
 const zipPar = sequenceT(readerTaskEither)
-
-function fromTry<R = void, A = never>(f: () => A): ZIO<R, Throwable, A> {
-  try {
-    return succeed(f())
-  } catch (e) {
-    return fail(e)
-  }
-}
 
 function catchAll<R, E, A>(
   onError: (e: Throwable) => ZIO<R, E, A>
@@ -81,9 +90,9 @@ export const ZIO = {
   ...RTE,
   succeed,
   fail,
+  fromTry,
   zip,
   zipPar,
-  fromTry,
   catchAll,
   catchSome,
   access,

@@ -20,5 +20,12 @@
     },
     "strict": true
   },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.d.ts"
+  ],
   "exclude": ["node_modules", "tmp"]
 }

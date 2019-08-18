@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - "10"
+script:
+  - yarn format:check --base=origin/master --head=$TRAVIS_COMMIT
+  - yarn affected:lint --base=origin/master --head=$TRAVIS_COMMIT
+  - yarn affected:test --base=origin/master --head=$TRAVIS_COMMIT
