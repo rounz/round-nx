@@ -11,14 +11,14 @@ const expectRight = <E, A>(result: Either<E, A>) =>
 describe('ZIO bindings', () => {
   it('succeed', async () => {
     const z = ZIO.succeed(42)
-    const result = await z()()
+    const result = await z(null)()
 
     expectRight(result).toEqual(42)
   })
 
   it('fail', async () => {
     const z = ZIO.fail('Uh oh!')
-    const result = await z()()
+    const result = await z(null)()
 
     expectLeft(result).toEqual('Uh oh!')
   })
@@ -27,7 +27,7 @@ describe('ZIO bindings', () => {
     const f = jest.fn()
 
     ZIO.fromTry(f)
-    ZIO.fromTry(f)()
+    ZIO.fromTry(f)(null)
 
     expect(f).not.toHaveBeenCalled()
   })
@@ -36,14 +36,14 @@ describe('ZIO bindings', () => {
     const z = ZIO.fromTry(() => {
       throw 27
     })
-    const result = await z()()
+    const result = await z(null)()
 
     expectLeft(result).toEqual(27)
   })
 
   it('fromTry succeed', async () => {
     const z = ZIO.fromTry(() => 31)
-    const result = await z()()
+    const result = await z(null)()
 
     expectRight(result).toEqual(31)
   })

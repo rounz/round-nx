@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as RTE from 'fp-ts/lib/ReaderTaskEither'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {
@@ -5,22 +7,21 @@ import {
   readerTaskEither,
   readerTaskEitherSeq
 } from 'fp-ts/lib/ReaderTaskEither'
-import { Either } from 'fp-ts/lib/Either'
 import { identity } from 'fp-ts/lib/function'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { tryCatch } from 'fp-ts/lib/TaskEither'
 
 export type ZIO<R, E, A> = ReaderTaskEither<R, E, A>
 
-export type UIO<A> = ZIO<void, never, A>
+export type UIO<A> = ZIO<any, never, A>
 
 export type URIO<R, A> = ZIO<R, never, A>
 
-export type Task<A> = ZIO<void, Throwable, A>
+export type Task<A> = ZIO<any, Throwable, A>
 
 export type RIO<R, A> = ZIO<R, Throwable, A>
 
-export type IO<E, A> = ZIO<void, E, A>
+export type IO<E, A> = ZIO<any, E, A>
 
 export type Throwable = unknown
 
@@ -28,12 +29,11 @@ const zio = readerTaskEither
 
 const zioSeq = readerTaskEitherSeq
 
-const succeed: <R = void, E = never, A = never>(a: A) => ZIO<R, E, A> =
-  RTE.right
+const succeed: <R = any, E = never, A = never>(a: A) => ZIO<R, E, A> = RTE.right
 
-const fail: <R = void, E = never, A = never>(e: E) => ZIO<R, E, A> = RTE.left
+const fail: <R = any, E = never, A = never>(e: E) => ZIO<R, E, A> = RTE.left
 
-function fromTry<R = void, A = never>(f: () => A): ZIO<R, Throwable, A> {
+function fromTry<R = any, A = never>(f: () => A): ZIO<R, Throwable, A> {
   return () =>
     TE.tryCatch(
       () =>
@@ -48,10 +48,10 @@ function fromTry<R = void, A = never>(f: () => A): ZIO<R, Throwable, A> {
     )
 }
 
-function fromTask<R = void, A = never>(
-  f: () => Promise<A>
+function fromTask<R = any, A = never>(
+  f: (r: R) => Promise<A>
 ): ZIO<R, Throwable, A> {
-  return RTE.fromTaskEither(tryCatch(f, identity))
+  return r => RTE.fromTaskEither(tryCatch(() => f(r), identity))(r)
 }
 
 const zip = sequenceT(zio)
@@ -87,7 +87,7 @@ function catchSome<R, E, A>(
   }
 }
 
-const access: <R, A>(f: (r: R) => A) => ZIO<R, never, A> = f => r =>
+const access: <R>() => <A>(f: (r: R) => A) => ZIO<R, never, A> = () => f => r =>
   RTE.right(f(r))(r)
 
 const accessM: <R, E, A>(
@@ -96,7 +96,7 @@ const accessM: <R, E, A>(
 
 const provide: <R, E, A>(
   r: R
-) => (ma: ZIO<R, E, A>) => ZIO<void, E, A> = r => ma => () => ma(r)
+) => (ma: ZIO<R, E, A>) => ZIO<void | any, E, A> = r => ma => () => ma(r)
 
 function foldM<R, E, A, B>(
   onError: (e: E) => ZIO<R, never, B>,
@@ -123,10 +123,6 @@ const getOrElse: <R, E, A>(
 ) => (ma: ZIO<R, E, A>) => ZIO<R, E, A> = onError =>
   getOrElseM(e => succeed(onError(e)))
 
-function run<R>(r: R): <E, A>(ma: ZIO<R, E, A>) => Promise<Either<E, A>> {
-  return ma => ma(r)()
-}
-
 export const ZIO = {
   succeed,
   fail,
@@ -135,6 +131,7 @@ export const ZIO = {
   succeedTask: RTE.rightTask,
   failTask: RTE.leftTask,
   fromTask,
+  fromOption: RTE.fromOption,
   fromEither: RTE.fromEither,
   fromPredicate: RTE.fromPredicate,
   fromTaskEither: RTE.fromTaskEither,
@@ -149,10 +146,11 @@ export const ZIO = {
   fold,
   getOrElseM,
   getOrElse,
-  run,
   catchAll,
   catchSome,
   access,
   accessM,
   provide
 }
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
