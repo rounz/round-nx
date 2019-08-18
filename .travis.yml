@@ -3,5 +3,5 @@ node_js:
   - "10"
 script:
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then yarn format:check --head=$TRAVIS_PULL_REQUEST_SHA --base=$(git merge-base HEAD $TRAVIS_BRANCH); fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then yarn format:lint --head=$TRAVIS_PULL_REQUEST_SHA --base=$(git merge-base HEAD $TRAVIS_BRANCH); fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then yarn affected:lint --head=$TRAVIS_PULL_REQUEST_SHA --base=$(git merge-base HEAD $TRAVIS_BRANCH); fi'
   - yarn affected:test --all
