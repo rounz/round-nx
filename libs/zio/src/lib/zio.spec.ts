@@ -47,4 +47,24 @@ describe('ZIO bindings', () => {
 
     expectRight(result).toEqual(31)
   })
+
+  it('zip', async () => {
+    const z1 = ZIO.rightIO(() => 4)
+    const z2 = ZIO.rightIO(() => '2')
+
+    const z3 = ZIO.zip(z1, z2)
+    const result = await z3({})()
+
+    expectRight(result).toEqual([4, '2'])
+  })
+
+  it('zipPar', async () => {
+    const z1 = ZIO.rightIO(() => 4)
+    const z2 = ZIO.rightIO(() => '2')
+
+    const z3 = ZIO.zipPar(z1, z2)
+    const result = await z3({})()
+
+    expectRight(result).toEqual([4, '2'])
+  })
 })
