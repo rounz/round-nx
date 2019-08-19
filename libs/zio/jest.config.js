@@ -1,9 +1,9 @@
 module.exports = {
-  name: 'love-letterz',
+  name: 'zio',
   preset: '../../jest.config.js',
   transform: {
     '^.+\\.[tj]sx?$': 'ts-jest'
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
-  coverageDirectory: '../../coverage/apps/love-letterz'
+  coverageDirectory: '../../coverage/libs/zio'
 }

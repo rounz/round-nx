@@ -1,6 +1,6 @@
-import React from 'react';
-
-import './app.scss';
+import './app.scss'
+import { Task, ZIO } from '@round/zio'
+import React from 'react'
 
 export const App = () => {
   /*
@@ -80,7 +80,9 @@ nx affected:e2e
         </details>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+const AppZ: Task<React.FC> = ZIO.succeed(App)
+
+export default AppZ

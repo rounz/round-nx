@@ -1,20 +1,35 @@
-import React from 'react';
-import { render, cleanup } from '@testing-library/react';
-
-import App from './app';
+import { PlatformVoid, Runtime, ZIO } from '@round/zio'
+import { cleanup, render } from '@testing-library/react'
+import AppZ from './app'
+import React from 'react'
+import { pipe } from 'fp-ts/lib/pipeable'
 
 describe('App', () => {
-  afterEach(cleanup);
+  const runtime = Runtime.create(void 0, PlatformVoid)
 
-  it('should render successfully', () => {
-    const { baseElement } = render(<App />);
+  afterEach(cleanup)
 
-    expect(baseElement).toBeTruthy();
-  });
+  it('should render successfully', async () => {
+    await pipe(
+      AppZ,
+      ZIO.map(App => {
+        const { baseElement } = render(<App />)
 
-  it('should have a greeting as the title', () => {
-    const { getByText } = render(<App />);
+        expect(baseElement).toBeTruthy()
+      }),
+      runtime.unsafeRun
+    )
+  })
 
-    expect(getByText('Welcome to love-letterz!')).toBeTruthy();
-  });
-});
+  it('should have a greeting as the title', async () => {
+    await pipe(
+      AppZ,
+      ZIO.map(App => {
+        const { getByText } = render(<App />)
+
+        expect(getByText('Welcome to love-letterz!')).toBeTruthy()
+      }),
+      runtime.unsafeRun
+    )
+  })
+})

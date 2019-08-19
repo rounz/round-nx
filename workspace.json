@@ -109,6 +109,33 @@
           }
         }
       }
+    },
+    "zio": {
+      "root": "libs/zio",
+      "sourceRoot": "libs/zio/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "config": "libs/zio/.eslintrc",
+            "tsConfig": [
+              "libs/zio/tsconfig.lib.json",
+              "libs/zio/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/zio/**"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/zio/jest.config.js",
+            "tsConfig": "libs/zio/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "cli": {

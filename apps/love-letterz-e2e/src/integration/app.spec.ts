@@ -1,9 +1,9 @@
-import { getGreeting } from '../support/app.po';
+import { getGreeting } from '../support/app.po'
 
 describe('love-letterz', () => {
-  beforeEach(() => cy.visit('/'));
+  beforeEach(() => cy.visit('/'))
 
   it('should display welcome message', () => {
-    getGreeting().contains('Welcome to love-letterz!');
-  });
-});
+    getGreeting().contains('Welcome to love-letterz!')
+  })
+})
