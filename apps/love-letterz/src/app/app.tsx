@@ -1,88 +1,119 @@
 import './app.scss'
+
+import {
+  BrowserRouter,
+  BrowserRouterProps,
+  Link,
+  Redirect,
+  Route,
+  RouteComponentProps,
+  RouteProps,
+  withRouter
+} from 'react-router-dom'
+import React, { useState } from 'react'
 import { Task, ZIO } from '@round/zio'
-import React from 'react'
 
-export const App = () => {
-  /*
-   * Replace the elements below with your own.
-   *
-   * Note: The corresponding styles are in the ./${fileName}.${style} file.
-   */
+const fakeAuth = {
+  isAuthenticated: false,
+  authenticate(cb: () => unknown) {
+    this.isAuthenticated = true
+    setTimeout(cb, 100) // fake async
+  },
+  signout(cb: () => unknown) {
+    this.isAuthenticated = false
+    setTimeout(cb, 100)
+  }
+}
+
+const AuthButton = withRouter(({ history }) =>
+  fakeAuth.isAuthenticated ? (
+    <p>
+      Welcome!{' '}
+      <button
+        onClick={() => {
+          fakeAuth.signout(() => history.push('/'))
+        }}
+      >
+        Sign out
+      </button>
+    </p>
+  ) : (
+    <p>You are not logged in.</p>
+  )
+)
+
+const PrivateRoute: React.FC<RouteProps> = ({
+  component: Component,
+  ...rest
+}) => {
+  return Component ? (
+    <Route
+      {...rest}
+      render={(props: RouteComponentProps<{}>) =>
+        fakeAuth.isAuthenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: '/login',
+              state: { from: props.location }
+            }}
+          />
+        )
+      }
+    />
+  ) : null
+}
+
+function Public() {
+  return <h3>Public</h3>
+}
+
+function Protected() {
+  return <h3>Protected</h3>
+}
+
+const Login: React.FC<RouteComponentProps> = props => {
+  const [state, setState] = useState({ redirectToReferrer: false })
+  const login = () => {
+    fakeAuth.authenticate(() => {
+      setState({ redirectToReferrer: true })
+    })
+  }
+
+  const { from } = props.location.state || { from: { pathname: '/' } }
+  const { redirectToReferrer } = state
+
+  if (redirectToReferrer) return <Redirect to={from} />
   return (
-    <div className="app">
-      <header className="flex">
-        <img
-          alt=""
-          width="75"
-          src="https://nx.dev/assets/images/nx-logo-white.svg"
-        />
-        <h1>Welcome to love-letterz!</h1>
-      </header>
-      <main>
-        <h2>Resources &amp; Tools</h2>
-        <p>
-          Thank you for using and showing some ♥ for Nx. <br />
-          Here are some links to help you get started.
-        </p>
-        <ul className="resources">
-          <li className="col-span-2">
-            <a
-              className="resource flex"
-              href="https://nx.dev/react/getting-started/what-is-nx"
-            >
-              Nx video tutorial
-            </a>
-          </li>
-          <li className="col-span-2">
-            <a
-              className="resource flex"
-              href="https://nx.dev/react/tutorial/01-create-application"
-            >
-              Interactive tutorial
-            </a>
-          </li>
-          <li className="col-span-2">
-            <a className="resource flex" href="https://connect.nrwl.io/">
-              <img
-                height="36"
-                alt="Nrwl Connect"
-                src="https://connect.nrwl.io/assets/img/CONNECT_ColorIcon.png"
-              />
-              <span className="gutter-left">Nrwl Connect</span>
-            </a>
-          </li>
-        </ul>
-        <h2>Next Steps</h2>
-        <p>Here are some things you can do with Nx.</p>
-        <details open>
-          <summary>Add UI library</summary>
-          <pre>{`# Generate UI lib
-nx g @nrwl/react:lib ui
-
-# Add a component
-nx g @nrwl/react:component xyz --project ui`}</pre>
-        </details>
-        <details>
-          <summary>View dependency graph</summary>
-          <pre>{`nx dep-graph`}</pre>
-        </details>
-        <details>
-          <summary>Run affected commands</summary>
-          <pre>{`# see what's been affected by changes
-nx affected:dep-graph
-
-# run tests for current changes
-nx affected:test
-
-# run e2e tests for current changes
-nx affected:e2e
-`}</pre>
-        </details>
-      </main>
+    <div>
+      <p>You must log in to view the page at {from.pathname}</p>
+      <button onClick={login}>Log in</button>
     </div>
   )
 }
 
-const AppZ: Task<React.FC> = ZIO.succeed(App)
+export const App: React.FC<BrowserRouterProps> = () => {
+  return (
+    <BrowserRouter>
+      <div>
+        <AuthButton />
+        <ul>
+          <li>
+            <Link to="/public">Public Page</Link>
+          </li>
+          <li>
+            <Link to="/protected">Protected Page</Link>
+          </li>
+        </ul>
+        <Route path="/public" component={Public} />
+        <Route path="/login" component={Login} />
+        <PrivateRoute path="/protected" component={Protected} />
+      </div>
+    </BrowserRouter>
+  )
+}
+
+const AppZ: Task<React.FC<BrowserRouterProps>> = ZIO.succeed(App)
 
 export default AppZ

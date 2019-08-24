@@ -8,7 +8,7 @@ import {
 } from 'fp-ts/lib/ReaderTaskEither'
 import { constVoid, identity } from 'fp-ts/lib/function'
 import { Option } from 'fp-ts/lib/Option'
-import { ZIORef } from './zio-ref'
+import { makeZIORef } from './ref'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { tryCatch } from 'fp-ts/lib/TaskEither'
@@ -156,7 +156,7 @@ const tap: <R, E, A>(
 const cached: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, A> = <R, E, A>(
   ma: ZIO<R, E, A>
 ) => {
-  const cache = ZIORef.make(O.none as Option<A>)
+  const cache = makeZIORef<R>()(O.none as Option<A>)
   return pipe(
     cache.get,
     RTE.chain(
@@ -164,7 +164,7 @@ const cached: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, A> = <R, E, A>(
         () =>
           pipe(
             ma,
-            tap((_): ZIO<R, E, Option<A>> => cache.set(O.some(_)))
+            tap((_): ZIO<R, E, void> => cache.set(O.some(_)))
           ),
         succeed
       )
