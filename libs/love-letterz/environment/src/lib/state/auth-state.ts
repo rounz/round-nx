@@ -10,7 +10,7 @@ export interface AuthState {
 
 export const AuthState = {
   init: (): AuthState => ({
-    auth: {
+    [key]: {
       isAuthenticated: false
     }
   }),

@@ -145,12 +145,6 @@ const constVoidZ: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, void> = RTE.map(
 
 const environment = <R>() => access<R>()(r => r)
 
-const mapEnvironment = <R>() => <A>(f: (r: R) => A): ZIO<R, never, A> =>
-  pipe(
-    environment<R>(),
-    RTE.map(f)
-  )
-
 const tapM: <R, E, A>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   f: (a: A) => ZIO<R, E, any>
@@ -228,7 +222,6 @@ export const ZIO = {
   accessM,
   provide,
   environment,
-  mapEnvironment,
   cached,
   tap,
   tapM,
