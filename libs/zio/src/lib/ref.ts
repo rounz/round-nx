@@ -18,14 +18,14 @@ export function ZIORef<A>(initial: A): ZIORef<A> {
 
   const get: ReaderTaskEither<any, never, A> = RTE.rightIO(() => value)
 
-  const set: (a: A) => ReaderTaskEither<any, never, void> =
-    a => RTE.rightIO(() => {
+  const set: (a: A) => ReaderTaskEither<any, never, void> = a =>
+    RTE.rightIO(() => {
       value = a
       subject.next(a)
     })
 
-  const update: (f: (a: A) => A) => ReaderTaskEither<any, never, void> =
-    f => pipe(
+  const update: (f: (a: A) => A) => ReaderTaskEither<any, never, void> = f =>
+    pipe(
       RTE.rightIO(() => f(value)),
       RTE.chain(set)
     )

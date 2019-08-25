@@ -109,8 +109,10 @@ const provide: <R, E, A>(
   r: R
 ) => (ma: ZIO<R, E, A>) => ZIO<AnyEnv, E, A> = r => ma => () => ma(r)
 
-const run: <R>(r: R) => <E, A>(ma: ZIO<R, E, A>) => Promise<Either<E, A>> =
-  r => ma => RTE.run(ma, r)
+const run: <R>(
+  r: R
+) => <E, A>(ma: ZIO<R, E, A>) => Promise<Either<E, A>> = r => ma =>
+  RTE.run(ma, r)
 
 function foldM<R, E, A, B>(
   onError: (e: E) => ZIO<R, never, B>,

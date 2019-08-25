@@ -13,8 +13,14 @@ export type LoveLetterzIO<E, A> = ZIO<LoveLetterz, E, A>
 
 export const LoveLetterz = {
   stateRef,
-  getState: pipe(stateRef,
-    ZIO.flatMap(ref => ref.get)),
-  setState: (f: (s: LoveLetterzState) => LoveLetterzState) => pipe(stateRef, ZIO.flatMap(ref => ref.update(f))),
+  getState: pipe(
+    stateRef,
+    ZIO.flatMap(ref => ref.get)
+  ),
+  setState: (f: (s: LoveLetterzState) => LoveLetterzState) =>
+    pipe(
+      stateRef,
+      ZIO.flatMap(ref => ref.update(f))
+    ),
   forComponent: ZIOReact.forComponent(stateRef)
 }
