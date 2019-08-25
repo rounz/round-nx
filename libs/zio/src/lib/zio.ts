@@ -7,12 +7,13 @@ import {
   readerTaskEitherSeq
 } from 'fp-ts/lib/ReaderTaskEither'
 import { constVoid, identity } from 'fp-ts/lib/function'
+import { Either } from 'fp-ts/lib/Either'
 import { Option } from 'fp-ts/lib/Option'
 import { ZIORef } from './ref'
+import { array } from 'fp-ts/lib/Array'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { tryCatch } from 'fp-ts/lib/TaskEither'
-import { Either } from 'fp-ts/lib/Either'
 
 export type ZIO<R, E, A> = ReaderTaskEither<R, E, A>
 
@@ -61,11 +62,11 @@ function fromTask<R = AnyEnv, A = never>(
   return r => RTE.fromTaskEither(tryCatch(() => f(r), identity))(r)
 }
 
-const sequence = sequenceT(zio)
+const sequence = array.sequence(zioSeq)
 
 const zip = sequenceT(zioSeq)
 
-const sequencePar = sequenceT(zioSeq)
+const sequencePar = array.sequence(zio)
 
 const zipPar = sequenceT(zio)
 

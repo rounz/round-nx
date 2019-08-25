@@ -11,7 +11,7 @@ const bindState = <R, S>(
 ): ZIO<R, never, SelectState<S>> =>
   pipe(
     stateRef,
-    ZIO.flatMap(ref => ZIO.sequencePar(ref.get, ref.getObservable)),
+    ZIO.flatMap(ref => ZIO.zip(ref.get, ref.getObservable)),
     ZIO.map(([initial, stateChange]) => select => {
       const [state, setState] = useState(select(initial))
 
@@ -39,7 +39,7 @@ const forComponent = <R, S>(
   stateRef: ZIO<R, never, ZIORef<S>>
 ): (<A>(f: (fc: ForComponent<R, S>) => A) => ZIO<R, never, A>) => f =>
   pipe(
-    ZIO.sequencePar(ZIO.environment<R>(), bindState(stateRef)),
+    ZIO.zip(ZIO.environment<R>(), bindState(stateRef)),
     ZIO.map(([environment, selectState]) =>
       f({
         environment,

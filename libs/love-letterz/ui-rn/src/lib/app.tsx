@@ -104,7 +104,7 @@ const Login = LoveLetterz.forComponent(
 )
 
 export const LoveLetterzApp = pipe(
-  ZIO.sequencePar(AuthButton, Login, PrivateRoute),
+  ZIO.zip(AuthButton, Login, PrivateRoute),
   ZIO.map(
     ([AuthButton, Login, PrivateRoute]): React.FC<BrowserRouterProps> => () => {
       return (
