@@ -1,58 +1,34 @@
-import { Applicative, Applicative1, Applicative3 } from 'fp-ts/lib/Applicative'
-import { HKT, Kind, Kind3, URIS, URIS3 } from 'fp-ts/lib/HKT'
-import { readerTaskEither } from 'fp-ts/lib/ReaderTaskEither'
+import * as RTE from 'fp-ts/lib/ReaderTaskEither'
+import { BehaviorSubject, Observable } from 'rxjs'
+import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
+import { pipe } from 'fp-ts/lib/pipeable'
 
-interface Ref3<F extends URIS3, R, E, A> {
-  get: Kind3<F, R, E, A>
-  set: (a: A) => Kind3<F, R, E, void>
-  update: (f: (a: A) => A) => Kind3<F, R, E, void>
+export interface ZIORef<A> {
+  getObservable: ReaderTaskEither<any, never, Observable<A>>
+  get: ReaderTaskEither<any, never, A>
+  set: (a: A) => ReaderTaskEither<any, never, void>
+  update: (f: (a: A) => A) => ReaderTaskEither<any, never, void>
 }
 
-interface Ref1<F extends URIS, A> {
-  get: Kind<F, A>
-  set: (a: A) => Kind<F, void>
-  update: (f: (a: A) => A) => Kind<F, void>
+export function ZIORef<A>(initial: A): ZIORef<A> {
+  let value = initial
+
+  const subject = new BehaviorSubject(value)
+  const getObservable = RTE.rightIO(() => subject.asObservable())
+
+  const get: ReaderTaskEither<any, never, A> = RTE.rightIO(() => value)
+
+  const set: (a: A) => ReaderTaskEither<any, never, void> =
+    a => RTE.rightIO(() => {
+      value = a
+      subject.next(a)
+    })
+
+  const update: (f: (a: A) => A) => ReaderTaskEither<any, never, void> =
+    f => pipe(
+      RTE.rightIO(() => f(value)),
+      RTE.chain(set)
+    )
+
+  return { get, set, update, getObservable }
 }
-
-interface Ref<F, A> {
-  get: HKT<F, A>
-  set: (a: A) => HKT<F, void>
-  update: (f: (a: A) => A) => HKT<F, void>
-}
-
-export function make<F extends URIS3>(
-  F: Applicative3<F>
-): <R, E, A>(value: A) => Ref3<F, R, E, A>
-export function make<F extends URIS>(
-  F: Applicative1<F>
-): <A>(value: A) => Ref1<F, A>
-export function make<F>(F: Applicative<F>): <A>(value: A) => Ref<F, A>
-export function make<F>(F: Applicative<F>): <A>(value: A) => Ref<F, A> {
-  return <A>(initial: A) => {
-    let value = initial
-
-    const unit = F.of(void 0)
-    const fromIO = <B>(f: () => B) => F.map(unit, f)
-
-    const get = fromIO(() => value)
-
-    const set = (a: A) =>
-      fromIO(() => {
-        value = a
-      })
-
-    const update = (f: (a: A) => A) =>
-      fromIO(() => {
-        value = f(value)
-      })
-
-    return {
-      get,
-      set,
-      update
-    }
-  }
-}
-
-export const makeZIORef = <R>() => <A>(value: A) =>
-  make(readerTaskEither)<R, never, A>(value)

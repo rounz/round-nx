@@ -66,17 +66,9 @@
             "linter": "eslint",
             "config": "apps/love-letterz/.eslintrc",
             "tsConfig": [
-              "apps/love-letterz/tsconfig.app.json",
-              "apps/love-letterz/tsconfig.spec.json"
+              "apps/love-letterz/tsconfig.app.json"
             ],
             "exclude": ["**/node_modules/**", "!apps/love-letterz/**"]
-          }
-        },
-        "test": {
-          "builder": "@nrwl/jest:jest",
-          "options": {
-            "jestConfig": "apps/love-letterz/jest.config.js",
-            "tsConfig": "apps/love-letterz/tsconfig.spec.json"
           }
         }
       }
@@ -133,6 +125,85 @@
           "options": {
             "jestConfig": "libs/zio/jest.config.js",
             "tsConfig": "libs/zio/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "love-letterz-core": {
+      "root": "libs/love-letterz/core",
+      "sourceRoot": "libs/love-letterz/core/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "config": "libs/love-letterz/core/.eslintrc",
+            "tsConfig": [
+              "libs/love-letterz/core/tsconfig.lib.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/love-letterz/core/**"]
+          }
+        }
+      }
+    },
+    "love-letterz-environment": {
+      "root": "libs/love-letterz/environment",
+      "sourceRoot": "libs/love-letterz/environment/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "config": "libs/love-letterz/environment/.eslintrc",
+            "tsConfig": [
+              "libs/love-letterz/environment/tsconfig.lib.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!libs/love-letterz/environment/**"
+            ]
+          }
+        }
+      }
+    },
+    "love-letterz-ui-rn": {
+      "root": "libs/love-letterz/ui-rn",
+      "sourceRoot": "libs/love-letterz/ui-rn/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "config": "libs/love-letterz/ui-rn/.eslintrc",
+            "tsConfig": [
+              "libs/love-letterz/ui-rn/tsconfig.lib.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/love-letterz/ui-rn/**"]
+          }
+        }
+      }
+    },
+    "zio-react": {
+      "root": "libs/zio-react",
+      "sourceRoot": "libs/zio-react/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "config": "libs/zio-react/.eslintrc",
+            "tsConfig": [
+              "libs/zio-react/tsconfig.lib.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/zio-react/**"]
           }
         }
       }

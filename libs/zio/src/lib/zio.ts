@@ -8,10 +8,11 @@ import {
 } from 'fp-ts/lib/ReaderTaskEither'
 import { constVoid, identity } from 'fp-ts/lib/function'
 import { Option } from 'fp-ts/lib/Option'
-import { makeZIORef } from './ref'
+import { ZIORef } from './ref'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { tryCatch } from 'fp-ts/lib/TaskEither'
+import { Either } from 'fp-ts/lib/Either'
 
 export type ZIO<R, E, A> = ReaderTaskEither<R, E, A>
 
@@ -108,6 +109,9 @@ const provide: <R, E, A>(
   r: R
 ) => (ma: ZIO<R, E, A>) => ZIO<AnyEnv, E, A> = r => ma => () => ma(r)
 
+const run: <R>(r: R) => <E, A>(ma: ZIO<R, E, A>) => Promise<Either<E, A>> =
+  r => ma => RTE.run(ma, r)
+
 function foldM<R, E, A, B>(
   onError: (e: E) => ZIO<R, never, B>,
   onSuccess: (a: A) => ZIO<R, never, B>
@@ -139,7 +143,13 @@ const constVoidZ: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, void> = RTE.map(
 
 const environment = <R>() => access<R>()(r => r)
 
-const tap: <R, E, A>(
+const mapEnvironment = <R>() => <A>(f: (r: R) => A): ZIO<R, never, A> =>
+  pipe(
+    environment<R>(),
+    RTE.map(f)
+  )
+
+const tapM: <R, E, A>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   f: (a: A) => ZIO<R, E, any>
 ) => (ma: ZIO<R, E, A>) => ZIO<R, E, A> = f => ma =>
@@ -153,10 +163,22 @@ const tap: <R, E, A>(
     )
   )
 
+const tap: <R, E, A>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  f: (a: A) => any
+) => (ma: ZIO<R, E, A>) => ZIO<R, E, A> = f => ma =>
+  pipe(
+    ma,
+    RTE.map(a => {
+      f(a)
+      return a
+    })
+  )
+
 const cached: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, A> = <R, E, A>(
   ma: ZIO<R, E, A>
 ) => {
-  const cache = makeZIORef<R>()(O.none as Option<A>)
+  const cache = ZIORef(O.none as Option<A>)
   return pipe(
     cache.get,
     RTE.chain(
@@ -164,7 +186,7 @@ const cached: <R, E, A>(ma: ZIO<R, E, A>) => ZIO<R, E, A> = <R, E, A>(
         () =>
           pipe(
             ma,
-            tap((_): ZIO<R, E, void> => cache.set(O.some(_)))
+            tapM((_): ZIO<R, E, void> => cache.set(O.some(_)))
           ),
         succeed
       )
@@ -204,6 +226,9 @@ export const ZIO = {
   accessM,
   provide,
   environment,
+  mapEnvironment,
   cached,
-  tap
+  tap,
+  tapM,
+  run
 }
