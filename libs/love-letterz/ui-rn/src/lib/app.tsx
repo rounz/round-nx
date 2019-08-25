@@ -18,9 +18,7 @@ import { Auth } from '@round/love-letterz/core'
 
 const AuthButton = LoveLetterz.forComponent(({ environment, selectState }) =>
   withRouter(({ history }) => {
-    const [isAuthenticated, setState] = selectState(
-      AuthState.lens.isAuthenticated.get
-    )
+    const isAuthenticated = selectState(AuthState.lens.isAuthenticated.get)
 
     return isAuthenticated ? (
       <p>
@@ -48,9 +46,7 @@ const PrivateRoute = LoveLetterz.forComponent(
     component: Component,
     ...rest
   }) => {
-    const [isAuthenticated, setState] = selectState(
-      AuthState.lens.isAuthenticated.get
-    )
+    const isAuthenticated = selectState(AuthState.lens.isAuthenticated.get)
 
     return Component ? (
       <Route
