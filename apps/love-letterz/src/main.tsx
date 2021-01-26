@@ -1,20 +1,23 @@
-import { Platform, Runtime } from '@round/zio'
-import AppZ from './app/app'
+import { LoveLetterz, LoveLetterzState } from '@round/love-letterz/environment'
+import { ZIO, ZIORef } from '@round/zio'
+import { LoveLetterzApp } from '@round/love-letterz/ui-rn'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { pipe } from 'fp-ts/lib/pipeable'
 
-const PlatformReact: Platform = {
-  bootstrap: (App: unknown) => {
-    try {
-      const UnsafeApp = App as React.FC
-      ReactDOM.render(<UnsafeApp />, document.getElementById('root'))
-    } catch (e) {
-      console.error('Cannot bootstrap React App')
-      throw e
-    }
-  }
+const environment: LoveLetterz = {
+  stateRef: ZIORef(LoveLetterzState.init())
 }
 
-const runtime = Runtime.create(void 0, PlatformReact)
-
-runtime.unsafeRun(AppZ)
+pipe(
+  LoveLetterzApp,
+  ZIO.fold(
+    e => {
+      throw e
+    },
+    App => {
+      ReactDOM.render(<App />, document.getElementById('root'))
+    }
+  ),
+  ZIO.run(environment)
+)

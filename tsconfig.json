@@ -16,16 +16,16 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@round/zio": ["libs/zio/src/index.ts"]
+      "@round/zio": ["libs/zio/src/index.ts"],
+      "@round/love-letterz/core": ["libs/love-letterz/core/src/index.ts"],
+      "@round/love-letterz/environment": [
+        "libs/love-letterz/environment/src/index.ts"
+      ],
+      "@round/love-letterz/ui-rn": ["libs/love-letterz/ui-rn/src/index.ts"],
+      "@round/zio-react": ["libs/zio-react/src/index.ts"]
     },
     "strict": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.d.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.d.ts"],
   "exclude": ["node_modules", "tmp"]
 }

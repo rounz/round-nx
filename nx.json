@@ -16,6 +16,18 @@
     },
     "zio": {
       "tags": []
+    },
+    "love-letterz-core": {
+      "tags": []
+    },
+    "love-letterz-environment": {
+      "tags": []
+    },
+    "love-letterz-ui-rn": {
+      "tags": []
+    },
+    "zio-react": {
+      "tags": []
     }
   }
 }
